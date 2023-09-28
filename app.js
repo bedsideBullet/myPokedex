@@ -19,7 +19,12 @@ const fetchPokemon = () => {
       image: data.sprites["front_default"],
       type: data.types.map((type) => type.type.name).join(", "),
     }));
+
+    const typeCounts = countTypes(pokemon);
+
     displayPokemon(pokemon);
+
+    displayTypeCounts(typeCounts);
   });
 };
 
@@ -56,17 +61,33 @@ const displayPokemon = (pokemon) => {
       }
     });
   });
+};
 
-  pokeFavs.addEventListener("click", (event) => {
-    if (event.target.classList.contains("card")) {
-      const clonedCard = event.target.cloneNode(true);
+const countTypes = (pokemon) => {
+  const typeCounts = {};
 
-      clonedCard.removeEventListener("click", () => {});
+  pokemon.forEach((pokedude) => {
+    const types = pokedude.type.split(", ");
 
-      pokedex.appendChild(clonedCard);
-      event.target.remove();
-    }
+    types.forEach((type) => {
+      if (typeCounts[type]) {
+        typeCounts[type]++;
+      } else {
+        typeCounts[type] = 1;
+      }
+    });
   });
+
+  return typeCounts;
+};
+
+const displayTypeCounts = (typeCounts) => {
+  const typeCountsContainer = document.getElementById("type-counts");
+  const typeCountsHTML = Object.keys(typeCounts)
+    .map((type) => `<p>${type}: ${typeCounts[type]},</p>`)
+    .join(" ");
+
+  typeCountsContainer.innerHTML = typeCountsHTML;
 };
 
 fetchPokemon();
@@ -100,5 +121,3 @@ function sortData() {
     mainContainer.appendChild(item);
   });
 }
-
-console.log(type);
