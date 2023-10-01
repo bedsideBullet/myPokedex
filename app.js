@@ -3,11 +3,9 @@ const pokeFavs = document.getElementById("pokefavs");
 const allItems = document.querySelectorAll(".card");
 const sortButton = document.getElementById("sort-btn");
 
-console.log(pokedex);
-
 const fetchPokemon = () => {
   const promises = [];
-  for (i = 1; i <= 151; i++) {
+  for (i = 1; i <= 30; i++) {
     const url = `https://pokeapi.co/api/v2/pokemon/${i}`;
     promises.push(fetch(url).then((res) => res.json()));
   }
@@ -63,6 +61,41 @@ const displayPokemon = (pokemon) => {
   });
 };
 
+pokeFavs.addEventListener("click", (event) => {
+  const card = event.target.closest(".card");
+
+  if (card && card.parentNode === pokeFavs) {
+    const clonedCard = card.cloneNode(true);
+    clonedCard.removeEventListener("click", () => {});
+
+    pokeFavs.removeChild(card);
+    pokedex.appendChild(clonedCard);
+  }
+});
+
+function setupCardClickListeners() {
+  const cards = document.querySelectorAll(".card");
+  cards.forEach((card) => {
+    card.addEventListener("click", () => {
+      const clonedCard = card.cloneNode(true);
+
+      clonedCard.removeEventListener("click", () => {});
+
+      if (card.parentNode === pokedex) {
+        pokeFavs.appendChild(clonedCard);
+        card.remove();
+      } else if (card.parentNode === pokeFavs) {
+        pokedex.appendChild(clonedCard);
+        card.remove();
+      }
+
+      setupCardClickListeners();
+    });
+  });
+}
+
+setupCardClickListeners();
+
 const countTypes = (pokemon) => {
   const typeCounts = {};
 
@@ -97,19 +130,51 @@ sortButton.addEventListener("click", () => {
   sortData(sortDirection);
 });
 
+const sortFavsButton = document.getElementById("sort-favs");
+sortFavsButton.addEventListener("click", () => {
+  const sortDirection = sortFavsButton.dataset.sortdir;
+  sortFavsData(sortDirection);
+});
+
+function sortFavsData() {
+  const favsContainer = document.getElementById("pokefavs");
+  const favItems = Array.from(favsContainer.querySelectorAll(".card"));
+  const currentSortDirection = sortFavsButton.dataset.sortdir;
+
+  favItems.sort((a, b) => {
+    const nameA = a.querySelector("h2").textContent.toUpperCase();
+    const nameB = b.querySelector("h2").textContent.toUpperCase();
+
+    if (currentSortDirection === "asc") {
+      return nameA.localeCompare(nameB);
+    } else {
+      return nameB.localeCompare(nameA);
+    }
+  });
+
+  sortFavsButton.dataset.sortdir =
+    currentSortDirection === "asc" ? "desc" : "asc";
+
+  favsContainer.innerHTML = "";
+
+  favItems.forEach((item) => {
+    favsContainer.appendChild(item);
+  });
+}
+
 function sortData() {
   const mainContainer = document.getElementById("pokedex");
   const allItems = Array.from(mainContainer.querySelectorAll(".card"));
   const currentSortDirection = sortButton.dataset.sortdir;
 
   allItems.sort((a, b) => {
-    const idA = parseInt(a.id);
-    const idB = parseInt(b.id);
+    const nameA = a.querySelector("h2").textContent.toUpperCase();
+    const nameB = b.querySelector("h2").textContent.toUpperCase();
 
     if (currentSortDirection === "asc") {
-      return idA - idB;
+      return nameA.localeCompare(nameB);
     } else {
-      return idB - idA;
+      return nameB.localeCompare(nameA);
     }
   });
 

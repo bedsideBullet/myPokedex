@@ -104,7 +104,7 @@ img {
     font-size: 27px;
 }
 
-#sort-btn {
+#sort-btn, #sort-favs {
     width: 75px;
     height: 75px;
     border-radius: 50%;
